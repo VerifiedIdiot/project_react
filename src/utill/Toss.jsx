@@ -49,7 +49,6 @@ const TossPage = (props) => {
 
   useEffect(() => {
     const paymentMethodsWidget = paymentMethodsWidgetRef.current;
-
     if (paymentMethodsWidget == null) {
       return;
     }
@@ -66,6 +65,9 @@ const TossPage = (props) => {
       <div id="payment-widget" />
       <BtnStyle
         onClick={async () => {
+
+
+          
           setPrice(payPrice);
           const paymentWidget = paymentWidgetRef.current;
           try {

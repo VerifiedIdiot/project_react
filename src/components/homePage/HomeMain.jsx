@@ -1,24 +1,16 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useInView } from "react-intersection-observer";
 import Introduction from "./comps/Introduction";
-import UserStatus from "./comps/UserStatus";
-import CurrentLocationWeather from "./comps/currentLocationWeather/CurrentLocationWeather";
+import AboutUs from "./comps/aboutUs.jsx/AboutUs";
+import AboutCalander from "./comps/aboutCalander/AboutFunctions";
+// import CurrentLocationIntro from "./comps/currentLocationWeather/CurrentLocationIntro";
+// import CurrentLocationWeather from "./comps/currentLocationWeather/CurrentLocationWeather";
 import RegionWeather from "./comps/regionWeather/RegionWeather";
 import Strays from "./comps/Strays";
 import CurrentAddressContext from "./CurrentAddressContext";
 import Chatbot from "../service/ChatBot";
-import ChatBotImg from "../../img/ChatBot.png";
+import ChatBotImg from "../../icon/ChatBot.png";
 
-const fadeIn = `
-  opacity: 1;
-  transform: translateY(0px);
-`;
-
-const fadeOut = `
-  opacity: 0;
-  transform: translateY(30px);
-`;
 
 const SectionContainer = styled.section.withConfig({
   className: "section-container",
@@ -27,9 +19,9 @@ const SectionContainer = styled.section.withConfig({
   flex-direction: column;
   align-items: center;
   width: 100vw;
-  height: 100vw;
-  transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-  border: 1px solid black;
+  height: ${(props) => props.$height || "50vw"};
+  background-color: ${(props) => props.$backGround || "white"};
+  /* border: 1px solid black; */
 `;
 
 const ItemContainer = styled.div.attrs({
@@ -37,7 +29,7 @@ const ItemContainer = styled.div.attrs({
 })`
   display: flex;
   justify-content: center;
-  width: 80%;
+  width: 100%;
   height: ${(props) => props.$height || "30%"};
 `;
 
@@ -45,21 +37,35 @@ const ChatbotBox = styled.div`
   position: fixed;
   z-index: 1000;
   height: auto;
-  top: 19%;
-  right: 11%;
-  width: 30%;
+  bottom: 6%;
+  left: 10%;
+  width: 20%;
   min-width: 280px;
   max-width: 450px;
+
+  @media (max-width: 1280px) {
+    left: 14%; /* 뷰포트 크기가 768px 이하일 때의 값 */
+  }
+  @media (max-width: 768px) {
+    left: 23%; /* 뷰포트 크기가 768px 이하일 때의 값 */
+  }
 `;
 
 const ChatbotIcon = styled.img`
   position: fixed;
-  width: 5.5%;
-  max-width: 100px;
-  right: 3%;
+  width: 5%;
+  min-width: 66px;
+  right: 92%;
   cursor: pointer;
   z-index: 9999;
-  top: 150px;
+  top: 87%;
+
+  @media (max-width: 1280px) {
+    right: 89%; /* 뷰포트 크기가 768px 이하일 때의 값 */
+  }
+  @media (max-width: 768px) {
+    right: 81%; /* 뷰포트 크기가 768px 이하일 때의 값 */
+  }
 `;
 
 const HomeMain = () => {
@@ -80,21 +86,39 @@ const HomeMain = () => {
         value={{ currentAddress, setCurrentAddress }}
       >
         <SectionContainer>
-          <ItemContainer>
+          <ItemContainer $height="100%">
             <Introduction />
-            <UserStatus />
           </ItemContainer>
-          <ItemContainer $height="40%">
-            <CurrentLocationWeather />
+        </SectionContainer>
+
+        <SectionContainer $height="35vw" $backGround="#fff">
+          <ItemContainer $height="100%">
+            <AboutUs />
+          </ItemContainer>
+        </SectionContainer>
+
+        <SectionContainer  $backGround="#f2f2f4">
+          <ItemContainer $height="100%">
+            <AboutCalander/>
+            {/* <CurrentLocationIntro />
+            <CurrentLocationWeather /> */}
+          </ItemContainer>
+        </SectionContainer>
+
+        <SectionContainer>
+          <ItemContainer>
             <RegionWeather />
           </ItemContainer>
+        </SectionContainer>
+
+        <SectionContainer>
           <ItemContainer>
-            <Strays></Strays>
+            <Strays />
           </ItemContainer>
         </SectionContainer>
       </CurrentAddressContext.Provider>
 
-      <ChatbotIcon
+      {/* <ChatbotIcon
         src={ChatBotImg}
         onClick={showChatbot ? closeChatbot : toggleChatbot}
       />
@@ -102,7 +126,7 @@ const HomeMain = () => {
         <ChatbotBox>
           <Chatbot />
         </ChatbotBox>
-      ) : null}
+      ) : null} */}
     </>
   );
 };

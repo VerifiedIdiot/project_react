@@ -6,6 +6,7 @@ import { ReactComponent as Logo } from "../../icon/petmemori.svg";
 
 const Container = styled.div`
   width: 30vw;
+  min-width: 410px;
   height: auto;
   display: flex;
   flex-wrap: nowrap;
@@ -16,10 +17,10 @@ const Container = styled.div`
   border-radius: 10px;
   margin-bottom: 3vh;
   padding: 8px;
+  border: 1px solid black;
 
   & .login {
     margin: 0 auto;
-
     letter-spacing: 0px;
     color: black;
     opacity: 1;
@@ -33,10 +34,8 @@ const Container = styled.div`
 
   .Title {
     font-size: 20px;
-    margin-bottom: 0.5rem;
-    width: 30vw;
-    text-align: start;
     font-weight: bold;
+    padding: 1rem;
   }
 `;
 
@@ -47,6 +46,7 @@ const Box = styled.div`
   align-items: center;
   justify-content: center;
   flex-direction: column;
+  border: 1px solid black;
 
   .Logo {
     width: 200px;
@@ -67,27 +67,54 @@ const Item1 = styled.div`
   align-items: center;
   margin: 5px;
   font-size: 13px;
+  border: 1px solid black;
 `;
 
 const Item2 = styled.input`
   border-radius: 10px;
   width: 15vw;
   height: 4vh;
+  min-width: 240px;
+`;
+
+const Item3 = styled.input`
+  border-radius: 10px;
+  width: 15vw;
+  height: 4vh;
+  min-width: 200px;
 `;
 
 const Button1 = styled.button`
   width: 100%;
+  height: 30px;
   border-radius: 10px;
-  background-color: #776b5d;
+  background-color: #333333;
   color: white;
+  cursor: pointer;
+
+  &:active {
+    //확인 클릭하면 설정
+    border: #999;
+    font-weight: 700;
+    background-color: #5c5b5b;
+  }
 `;
 
 const Button2 = styled.button`
   width: 5vw;
-  height: 4.5vh;
+  height: 4vh;
   border-radius: 10px;
-  background-color: #776b5d;
+  background-color: #333333;
   color: white;
+  cursor: pointer;
+  min-width: 70px;
+
+  &:active {
+    //확인 클릭하면 설정
+    border: #999;
+    font-weight: 700;
+    background-color: #5c5b5b;
+  }
 `;
 
 const FindIdPwd = () => {
@@ -121,9 +148,9 @@ const FindIdPwd = () => {
 
   const hideEmail = (email) => {
     const [username, domain] = email.split("@");
-    const hiddenPart = "*".repeat(Math.max(0, username.length - 2));
+    const hiddenPart = "*".repeat(Math.max(0, username.length - 3));
 
-    return username.slice(0, 2) + hiddenPart + "@" + domain;
+    return username.slice(0, 4) + hiddenPart + "@" + domain;
   };
 
   return (
@@ -149,33 +176,55 @@ const FindIdPwd = () => {
           <Item1 style={{ justifyContent: "center" }}>
             <Button1 onClick={findMemberId}>입력완료</Button1>
           </Item1>
-          {showFoundId && ( // 아이디 보이게 처리
-            <Item1>
-              {inputName}님의 아이디(이메일)는{" "}
-              <div style={{ color: "red", fontWeight: "bold" }}>
-                {hideEmail(foundId)}
-              </div>{" "}
-              입니다.
-            </Item1>
-          )}
+          <div
+            style={{
+              height: "15px",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            {showFoundId && ( // 아이디 보이게 처리
+              <Item1>
+                {inputName}님의 아이디(이메일)는{" "}
+                <div style={{ color: "red", fontWeight: "bold" }}>
+                  {hideEmail(foundId)}
+                </div>{" "}
+                입니다.
+              </Item1>
+            )}
+          </div>
           <div>
             <div className="Title">비밀번호 찾기</div>
           </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Item1>
-              아이디(이메일) : <Item2></Item2>
-            </Item1>
-            <Button2>전송</Button2>
-          </div>
-          <div style={{ display: "flex", alignItems: "center" }}>
-            <Item1>
-              인증번호 입력 : <Item2></Item2>
-            </Item1>
-            <Button2 style={{ marginLeft: "4px" }}>인증</Button2>
-          </div>
           <Item1>
-            회원님의 비밀번호는 <div></div> 입니다.
+            <div style={{ whiteSpace: "nowrap" }}>아이디:</div>
+            <div style={{ display: "flex" }}>
+              <Item3></Item3>
+              <Button2>전송</Button2>
+            </div>
           </Item1>
+          <Item1>
+            <div style={{ whiteSpace: "nowrap" }}>인증번호 입력 : </div>
+            <div style={{ display: "flex" }}>
+              <Item3></Item3>
+              <Button2>인증</Button2>
+            </div>
+          </Item1>
+
+          <div
+            style={{
+              height: "15px",
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+              marginBottom: "1rem",
+            }}
+          >
+            <Item1>
+              회원님의 비밀번호는 <div></div> 입니다.
+            </Item1>
+          </div>
         </Container>
       </Box>
     </CenteredContainer>

@@ -23,6 +23,12 @@ const Adminsales = () =>{
         setSelectedCategory(value);
     };
 
+    const formatDate = (dateString) => {
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' };
+        const formattedDate = new Date(dateString).toLocaleDateString('ko-KR', options);
+        return formattedDate;
+    };
+
     // 총 페이지 수 계산
     useEffect(() => {
         const totalPage = async () => {
@@ -68,33 +74,40 @@ const Adminsales = () =>{
         );
     };
 
-    // 송장번호 입력
-    const HandleInvoiceUpload = async(id, orderStatus, InvoiceInput) => {
-
+    // 송장번호 입력 .. orderStatus 빼면 송장번호 값이 안들어감.
+     const HandleInvoiceUpload = async (id, orderStatus, invoiceInput) => {
         try {
-            // console.log("아이디 : " + id, "송장번호 : " + invoiceInput);
-            const res = await AdminAxiosApi.InvoiceInput(id, "출고완료", InvoiceInput);
-            setInvoiceInput("");
-          
+            const onlyNum = /^[0-9]+$/.test(invoiceInput);
+            if (!onlyNum) {
+                alert("송장번호는 숫자로만 입력 가능합니다.");
+                return;
+            }
+
+            const res = await AdminAxiosApi.InvoiceInput(id, "출고완료", invoiceInput);
+
             if (res.data === true) {
-                
                 const res = await AdminAxiosApi.SaleAllList(id);
 
                 const updatedOrders = orders.map((order) =>
-                order.saleId === id ? { ...order, invoice: invoiceInput, orderStatus: '출고완료' } : order
+                    order.saleId === id
+                        ? { ...order, invoice: invoiceInput, orderStatus: "출고완료" }
+                        : order
                 );
-                setOrders(updatedOrders);
-                reRender();
                 console.log(res);
                 console.log(res.data);
-               
+
+                setOrders(updatedOrders);
+                setInvoiceInput("");
+                reRender();
             }
-        } catch (e) {
+        } catch (e) { // 토큰 만료시, 이쪽으로 넘어감
             console.error(e);
-            alert("숫자만 입력해주세요.");
+            alert("입력 오류");
+            reRender();
         }
         
     };
+
 
 
     // 필터별로 조회
@@ -148,6 +161,8 @@ const Adminsales = () =>{
                                     <th>Addr</th>
                                     {/* <th>Tel</th> */}
                                     <th>Order</th>
+                                    <th>Quantity</th>
+                                    <th>Price</th>
                                     <th>Status</th>
                                     <th>Invoice</th>
                                     {/* <th className="btnArea"></th> */}
@@ -156,15 +171,17 @@ const Adminsales = () =>{
                             <tbody>
                                 {filteredOrders.map((order, index) => (
                                     <tr key={index}>
-                                        <td>{order.saleId}</td>
-                                        <td>{order.salesRegDate}</td>
+                                        <td>{index + 1}</td>
+                                        <td>{formatDate(order.salesRegDate)}</td>
                                         <td>{order.memberId}</td>
                                         <td>{order.salesAddr}</td>
                                         {/* <td>{order.Tel}</td> */}
                                         <td>{order.feedName}</td>
+                                        <td>{order.feedSubscribe}</td>
+                                        <td>{order.salesPrice}</td>
                                         <td onChange={(e) => setOrderstatus(e.target.value)}>{order.orderStatus}</td>
                                         <td>
-                                            {order.invoice}
+                                            <span>{order.invoice}</span>
                                             
                                             <input
                                             type="text"

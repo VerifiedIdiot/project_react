@@ -5,6 +5,7 @@ import Modal from "../utill/Modal";
 import AxiosApi from "../../src/api/Axios";
 import Common from "../utill/Common";
 import { ReactComponent as Logo } from "../icon/petmemori.svg";
+import SocialKakao from "./kakaologin";
 
 const Container = styled.div`
   width: 400px;
@@ -16,6 +17,22 @@ const Container = styled.div`
   justify-content: space-evenly;
   background-color: #ebebeb;
   border-radius: 10px;
+
+  .Enter {
+    width: 400px;
+    height: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+    background-color: #ebebeb;
+    border-radius: 10px;
+
+    @media (max-width: 1280px) {
+      width: 350px;
+    }
+  }
 
   @media (max-width: 1280px) {
     width: 350px;
@@ -242,7 +259,6 @@ const Login = () => {
   };
 
   const onClickLogin = async () => {
-    //로그인을 위한 axios 호출
     try {
       const res = await AxiosApi.Login(inputEmail, inputPw);
       console.log(res.data);
@@ -262,46 +278,52 @@ const Login = () => {
     }
   };
 
+  const enterLogin = (e) => {
+    e.preventDefault();
+    onClickLogin();
+  };
+
   return (
     <CenteredContainer>
       <Box>
         <Container>
-          <Logo className="Logo" onClick={() => navigate("/")} />
-          <Items className="login"></Items>
-          <Items className="item2">
-            <Input
-              placeholder="아이디"
-              value={inputEmail}
-              onChange={onChangeEmail}
-            />
-          </Items>
-
+          <form onSubmit={enterLogin} className="Enter">
+            <Logo className="Logo" onClick={() => navigate("/")} />
+            <Items className="login"></Items>
+            <Items className="item2">
+              <Input
+                placeholder="아이디 (이메일 형식)"
+                value={inputEmail}
+                onChange={onChangeEmail}
+              />
+            </Items>
+            {/* 
           <Hint>
             {inputEmail.length > 0 && (
               <span className={`${isId ? "success" : "error"}`}>
                 {idMessage}
               </span>
             )}
-          </Hint>
+          </Hint> */}
 
-          <Items className="item2">
-            <Input
-              type="password"
-              placeholder="패스워드"
-              value={inputPw}
-              onChange={onChangePw}
-            />
-          </Items>
-          <Hint>
+            <Items className="item2">
+              <Input
+                type="password"
+                placeholder="패스워드 (숫자, 영문, 특수문자 조합)"
+                value={inputPw}
+                onChange={onChangePw}
+              />
+            </Items>
+            {/* <Hint>
             {inputPw.length > 0 && (
               <span className={`${isPw ? "success" : "error"}`}>
                 {pwMessage}
               </span>
             )}
-          </Hint>
-
-          <Button1 onClick={onClickLogin}>로그인</Button1>
-          <Button2>카카오톡 로그인</Button2>
+          </Hint> */}
+            <Button1 onClick={onClickLogin}>로그인</Button1>
+          </form>
+          <SocialKakao />
 
           <Modal open={modalOpen} close={closeModal} header="오류">
             아이디 및 패스워드를 확인해 주세요.
