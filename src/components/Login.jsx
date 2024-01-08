@@ -5,7 +5,7 @@ import Modal from "../utill/Modal";
 import AxiosApi from "../../src/api/Axios";
 import Common from "../utill/Common";
 import { ReactComponent as Logo } from "../icon/petmemori.svg";
-import SocialKakao from "./kakaologin";
+import kakaoLogin from "../img/kakao_login_large_narrow.png";
 
 const Container = styled.div`
   width: 400px;
@@ -15,8 +15,8 @@ const Container = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: space-evenly;
-  background-color: #ebebeb;
-  border-radius: 10px;
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  border-radius: 8px;
 
   .Enter {
     width: 400px;
@@ -26,8 +26,7 @@ const Container = styled.div`
     flex-direction: column;
     align-items: center;
     justify-content: space-evenly;
-    background-color: #ebebeb;
-    border-radius: 10px;
+    border-radius: 8px;
 
     @media (max-width: 1280px) {
       width: 350px;
@@ -58,18 +57,6 @@ const Container = styled.div`
     cursor: pointer;
   }
 `;
-const Hint = styled.div`
-  width: 60%;
-  height: 10px;
-  text-align: right;
-  font-size: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: end;
-  white-space: nowrap;
-
-  padding: 2px;
-`;
 
 const Items = styled.div`
   cursor: pointer;
@@ -90,7 +77,7 @@ const Items = styled.div`
     width: 50%;
     margin-top: 20px;
     justify-content: center;
-    color: red;
+    color: black;
     font-size: 14px;
     display: flex;
     margin-bottom: 2rem;
@@ -125,7 +112,7 @@ const Items = styled.div`
 
     &:hover {
       span {
-        color: blue;
+        color: #f95001;
         text-decoration-line: underline;
       }
     }
@@ -138,7 +125,7 @@ const Input = styled.input`
   padding: 0.8em 0.5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */
   font-family: inherit; /* 폰트 상속 */
   border: 1px solid #999;
-  border-radius: 12px; /* iSO 둥근모서리 제거 */
+  border-radius: 8px; /* iSO 둥근모서리 제거 */
   outline-style: none; /* 포커스시 발생하는 효과 제거를 원한다면 */
 `;
 
@@ -147,18 +134,17 @@ const Button1 = styled.button`
   margin-left: 30px;
   margin-right: 30px;
   font-family: "Noto Sans KR", sans-serif;
-  font-size: 26px;
   font-weight: bold;
   width: 60%; /* 원하는 너비 설정 */
-  height: 55px;
+  height: 45px;
   color: white;
   background-color: #333333;
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 400;
-  border-radius: 12px;
-  font-weight: 700;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  font-family: inherit;
 
   &:active {
     //확인 클릭하면 설정
@@ -172,19 +158,17 @@ const Button2 = styled.button`
   margin-top: 10px;
   margin-left: 30px;
   margin-right: 30px;
-  font-family: "Noto Sans KR", sans-serif;
-  font-size: 26px;
   font-weight: bold;
   width: 60%; /* 원하는 너비 설정 */
-  height: 55px;
+  height: 45px;
   color: black;
-  background-color: #f1f500;
-  font-size: 15px;
-  font-weight: 400;
-  border-radius: 12px;
-  font-weight: 700;
+  background-image: url(${kakaoLogin});
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  background-size: cover; /* 이미지를 버튼에 맞게 늘리거나 축소함 */
+  background-repeat: no-repeat; /* 이미지 반복을 방지 */
+  background-position: center;
 
   &:active {
     //확인 클릭하면 설정
@@ -265,8 +249,11 @@ const Login = () => {
       if (res.data.grantType === "Bearer") {
         Common.setAccessToken(res.data.accessToken);
         Common.setRefreshToken(res.data.refreshToken);
-        navigate("/");
-        window.localStorage.setItem("email", inputEmail);
+        if (inputEmail === "admin") {
+          navigate("/ad");
+        } else {
+          navigate("/");
+        }
       } else {
         setModalOpen(true);
         setModalContent("아이디 및 패스워드를 재확인해 주세요.^^");
@@ -283,6 +270,15 @@ const Login = () => {
     onClickLogin();
   };
 
+  const Rest_api_key = "afb202ab4753ffdab4ab8549b0395416"; //REST API KEY
+  const redirect_uri = "http://localhost:3000/auth"; //Redirect URI
+  // oauth 요청 URL
+  const kakaoURL = `https://kauth.kakao.com/oauth/authorize?client_id=${Rest_api_key}&redirect_uri=${redirect_uri}&response_type=code`;
+
+  const handleLogin = () => {
+    window.location.href = kakaoURL;
+  };
+
   return (
     <CenteredContainer>
       <Box>
@@ -297,15 +293,6 @@ const Login = () => {
                 onChange={onChangeEmail}
               />
             </Items>
-            {/* 
-          <Hint>
-            {inputEmail.length > 0 && (
-              <span className={`${isId ? "success" : "error"}`}>
-                {idMessage}
-              </span>
-            )}
-          </Hint> */}
-
             <Items className="item2">
               <Input
                 type="password"
@@ -314,16 +301,9 @@ const Login = () => {
                 onChange={onChangePw}
               />
             </Items>
-            {/* <Hint>
-            {inputPw.length > 0 && (
-              <span className={`${isPw ? "success" : "error"}`}>
-                {pwMessage}
-              </span>
-            )}
-          </Hint> */}
             <Button1 onClick={onClickLogin}>로그인</Button1>
           </form>
-          <SocialKakao />
+          <Button2 onClick={handleLogin}></Button2>
 
           <Modal open={modalOpen} close={closeModal} header="오류">
             아이디 및 패스워드를 확인해 주세요.

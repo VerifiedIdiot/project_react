@@ -1,5 +1,5 @@
 import styled from "styled-components";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { storage } from "./FireBase";
 import ServiceApi from "../api/ServiceApi";
@@ -81,7 +81,7 @@ const Box = styled.div`
   align-items: center;
   padding: 10px;
   .mini {
-    font-size: 20px;
+    font-size: 1.2rem;
     h2 {
       width: 150px;
       font-size: 1.5rem;
@@ -90,8 +90,8 @@ const Box = styled.div`
   .container-button {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    row-gap: 10px;
-    column-gap: 10px;
+    row-gap: 5px;
+    column-gap: 5px;
     justify-content: center;
   }
 `;
@@ -100,37 +100,35 @@ const Box2 = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  width: 100%;
+  padding: 10px;
 `;
 const Box3 = styled.div`
   display: flex;
   justify-content: flex-end;
   column-gap: 5px;
   padding: 10px;
+
   button {
-    color: white;
-    background-color: #333333;
-    border-radius: 10px;
-    border: none;
-    font-size: 1rem;
     width: 100px;
   }
 `;
 const Button = styled.button`
-  color: white;
-  background-color: #333333;
-  border-radius: 10px;
-  border: none;
-  font-size: 1rem;
+  color: ${({ selected }) => (selected ? "#f95001" : "white")};
+  background-color: ${({ selected }) => (selected ? "white" : "#333333")};
+  border-radius: 5px;
+  font-size: 0.85rem;
   padding: 10px;
   cursor: pointer;
+  border: 1px solid;
   &:hover {
     background-color: white;
     color: #f95001;
+    border: 1px solid #f95001;
   }
+
   @media (max-width: 768px) {
     padding: 8px;
-    font-size: 0.9rem;
-    border-radius: 8px;
   }
 `;
 const FileUploadContainer = styled.div`
@@ -144,13 +142,15 @@ const StyledInput = styled.input`
 `;
 
 const UploadButton = styled.button`
-  border: none;
+  padding: 10px;
   width: 100px;
-  border-radius: 10px;
+  border-radius: 5px;
   color: #333333;
   background: white;
+  border: 1px solid #f95001;
   &:hover {
     color: #f95001;
+    border: 1px solid #f95001;
   }
 `;
 const UserImage = styled.img`
@@ -160,12 +160,12 @@ const UserImage = styled.img`
 const Servicemodal = (props) => {
   const { open, close, id } = props;
   const [buttonText, setButtonText] = useState("");
-  const [BoardImg, setBoardImg] = useState("");
-  const [url, setUrl] = useState("");
+  const [boardImg, setBoardImg] = useState("");
   const [file, setFile] = useState(null);
+  const [url, setUrl] = useState("");
   const [boardType, setBoardType] = useState(""); // 문의 유형 선택값 저장
   const [comment, setComment] = useState(""); // textarea 내용 저장
-
+  const maxLength = 100;
   const handleButtonClick = (e) => {
     let boardTypeValue = "";
     const buttonText = e.target.innerText;
@@ -216,10 +216,9 @@ const Servicemodal = (props) => {
       // 다운로드 URL을 가져오고 기다립니다.
       const url = await fileRef.getDownloadURL();
       console.log("저장경로 확인 : " + url);
-
+      setBoardImg(url);
       // 상태를 업데이트합니다.
       setUrl(url);
-      setBoardImg(url);
     } catch (error) {
       // 에러를 처리합니다.
       console.error(error);
@@ -227,6 +226,7 @@ const Servicemodal = (props) => {
   };
   const Close = () => {
     setFile("");
+    setUrl("");
     setBoardType("");
     setComment("");
     setBoardImg("");
@@ -238,15 +238,15 @@ const Servicemodal = (props) => {
   // 수정버튼 boolean
   const boardUp = async () => {
     try {
-      console.log(id, boardType, comment, BoardImg);
-      const rsp = await ServiceApi.boardUp(id, boardType, comment, BoardImg);
+      console.log(id, boardType, comment, url);
+      const rsp = await ServiceApi.boardUp(id, boardType, comment, url);
       if (rsp.data === true) {
-        alert("수정성공");
+        alert("문의글 수정 완료.");
+        setUrl("");
         navigate("/service");
         close();
       } else {
-        alert("수정실패");
-        console.log(rsp);
+        alert("문의글 수정 실패.");
       }
     } catch (error) {
       console.log(error);
@@ -264,17 +264,43 @@ const Servicemodal = (props) => {
                 <h2>문의 유형</h2>
               </div>
               <Box2>
-                <div
-                  className="container-button"
-                  value={boardType}
-                  onClick={handleButtonClick}
-                >
-                  <Button>배송</Button>
-                  <Button>주문/결제</Button>
-                  <Button>취소/교환/환불</Button>
-                  <Button>회원정보</Button>
-                  <Button>사료문의</Button>
-                  <Button>이용문의</Button>
+                <div className="container-button">
+                  <Button
+                    selected={buttonText === "배송"}
+                    onClick={handleButtonClick}
+                  >
+                    배송
+                  </Button>
+                  <Button
+                    selected={buttonText === "주문/결제"}
+                    onClick={handleButtonClick}
+                  >
+                    주문/결제
+                  </Button>
+                  <Button
+                    selected={buttonText === "취소/교환/환불"}
+                    onClick={handleButtonClick}
+                  >
+                    취소/교환/환불
+                  </Button>
+                  <Button
+                    selected={buttonText === "회원정보"}
+                    onClick={handleButtonClick}
+                  >
+                    회원정보
+                  </Button>
+                  <Button
+                    selected={buttonText === "사료문의"}
+                    onClick={handleButtonClick}
+                  >
+                    사료문의
+                  </Button>
+                  <Button
+                    selected={buttonText === "이용문의"}
+                    onClick={handleButtonClick}
+                  >
+                    이용문의
+                  </Button>
                 </div>
               </Box2>
             </Box>
@@ -285,11 +311,18 @@ const Servicemodal = (props) => {
               <Box2>
                 <div className="mini">{buttonText}</div>
                 <textarea
+                  style={{ resize: "none" }}
                   onChange={handleTextareaChange}
-                  rows="10"
+                  rows="5"
                   cols="40"
                   placeholder="FAQ로 찾을 수 없는 문제가 있을땐, 1:1 문의를 올려주시면, 최대한 빠르고 정확하게 고객님께 답변드리도록 최선을 다하겠습니다."
+                  value={comment}
+                  maxLength={maxLength}
                 ></textarea>
+
+                <p>
+                  {comment.length}/{maxLength}
+                </p>
               </Box2>
             </Box>
             <Box>
@@ -301,7 +334,7 @@ const Servicemodal = (props) => {
                   <StyledInput type="file" onChange={handleFileInputChange} />
                   <UploadButton onClick={handleUploadClick}>선택</UploadButton>
                 </FileUploadContainer>
-                {BoardImg && <UserImage src={url} alt="uploaded" />}
+                {boardImg && <UserImage src={url} alt="uploaded" />}
               </Box2>
             </Box>
             <Box3>

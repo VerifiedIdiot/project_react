@@ -80,10 +80,10 @@ const Menus = styled.div`
 
 const Admin = () => {
   const navigate = useNavigate();
-  const [ activeMenu, setActiveMenu ] = useState(null);
+  const [ activeMenu, setActiveMenu ] = useState('');
 
   function handleClick(menu) {
-    navigate(`/admin/${menu}`);
+    navigate(`/ad/${menu}`);
     setActiveMenu(menu);
   }
 
@@ -113,6 +113,10 @@ const Admin = () => {
           <hr />
           <Menus className={activeMenu === 'feed' ? 'active' : ''} onClick={() => handleClick("feed")}>
             <p>사료 관리</p>
+          </Menus>
+          <hr />
+          <Menus className={activeMenu === 'animal' ? 'active' : ''} onClick={() => handleClick("animal")}>
+            <p>견종, 묘종 백과</p>
           </Menus>
           <hr />
         </SideBar>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import styled from "styled-components";
 import Modal from "../../utill/Modal";
@@ -9,6 +9,10 @@ import { ReactComponent as Logo } from "../../icon/petmemori.svg";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { ko } from "date-fns/locale";
+import { subDays, subYears } from "date-fns";
+import upArrowImage from "../../img/up-arrow.png";
+import downArrowImage from "../../img/down-arrow.png";
+import { PayContext } from "../../context/Paystore";
 
 const Container = styled.div`
   width: 500px;
@@ -16,9 +20,10 @@ const Container = styled.div`
   flex-wrap: nowrap;
   flex-direction: column;
   align-items: center;
-  background-color: #ebebeb;
-  border-radius: 10px;
-  justify-content: space-between;
+  border-radius: 5px;
+  justify-content: center; /* 수직으로 가운데 정렬 */
+  box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.5);
+  height: 100%;
 
   @media (max-width: 1280px) {
     width: 450px;
@@ -28,11 +33,11 @@ const Container = styled.div`
     width: 200px;
     margin-top: 2rem;
     cursor: pointer;
+    flex-shrink: 0;
   }
 
   & .login {
     margin: 0 auto;
-
     font: normal normal bold 24px/35px Poppins;
     letter-spacing: 0px;
     color: black;
@@ -47,7 +52,7 @@ const Container = styled.div`
 `;
 const Hint = styled.div`
   width: 60%;
-  height: 2%;
+  height: 5px;
   text-align: right;
   font-size: 11px;
   display: flex;
@@ -56,17 +61,39 @@ const Hint = styled.div`
 `;
 
 const Items = styled.div`
-  margin-bottom: 30px;
+  .react-datepicker__navigation--years-upcoming {
+    top: 0%;
+    background-image: url(${upArrowImage});
+    background-size: contain; /* 이미지 크기 설정 */
+    background-repeat: no-repeat; /* 이미지 반복 설정 */
+    background-position: center; /* 이미지를 가운데 정렬 */
+    background-size: 70%;
+    cursor: pointer;
+  }
+
+  .react-datepicker__navigation--years-previous {
+    top: 0%;
+    background-image: url(${downArrowImage});
+    background-size: contain; /* 이미지 크기 설정 */
+    background-repeat: no-repeat; /* 이미지 반복 설정 */
+    background-position: center; /* 이미지를 가운데 정렬 */
+    cursor: pointer;
+    background-size: 70%;
+  }
 
   .Calender {
-    width: 270px;
+    width: 300px;
     height: auto; /* 높이값 초기화 */
     line-height: normal; /* line-height 초기화 */
     padding: 0.8em 0.5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */
     font-family: inherit; /* 폰트 상속 */
     border: 1px solid #999;
-    border-radius: 12px; /* iSO 둥근모서리 제거 */
+    border-radius: 5px; /* iSO 둥근모서리 제거 */
     outline-style: none; /* 포커스시 발생하는 효과 제거를 원한다면 */
+
+    @media (max-width: 1280px) {
+      width: 270px;
+    }
   }
 
   &.item1 {
@@ -121,8 +148,7 @@ const Input = styled.input`
   padding: 0.8em 0.5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */
   font-family: inherit; /* 폰트 상속 */
   border: 1px solid #999;
-  border-radius: 12px 0px 0px 12px;
-  border-radius: 12px; /* iSO 둥근모서리 제거 */
+  border-radius: 5px; /* iSO 둥근모서리 제거 */
   outline-style: none; /* 포커스시 발생하는 효과 제거를 원한다면 */
 `;
 
@@ -133,7 +159,7 @@ const Input2 = styled.input`
   padding: 0.8em 0.5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */
   font-family: inherit; /* 폰트 상속 */
   border: 1px solid #999;
-  border-radius: 12px 0px 0px 12px; /* iSO 둥근모서리 제거 */
+  border-radius: 5px 0px 0px 5px; /* iSO 둥근모서리 제거 */
   outline-style: none; /* 포커스시 발생하는 효과 제거를 원한다면 */
 `;
 
@@ -142,19 +168,21 @@ const Button1 = styled.button`
   margin-left: 30px;
   margin-right: 30px;
   font-family: "Noto Sans KR", sans-serif;
-  font-size: 26px;
-  font-weight: bold;
   width: 60%; /* 원하는 너비 설정 */
   height: 55px;
   color: white;
   background-color: #333333;
-  font-size: 15px;
-  font-weight: 400;
-  border-radius: 12px;
-  font-weight: 700;
+  font-size: 20px;
+  border-radius: 5px;
+  font-weight: 500;
   border: none;
   white-space: nowrap;
   cursor: pointer;
+  flex-shrink: 0;
+  font-family: inherit; /* 폰트 상속 */
+
+  opacity: ${(props) =>
+    props.disabled ? "0.7" : "1"}; // 비활성화 상태일 때 투명도 설정
 
   &:active {
     //확인 클릭하면 설정
@@ -171,16 +199,36 @@ const Button1 = styled.button`
 
 const Button2 = styled.button`
   font-family: "Noto Sans KR", sans-serif;
-  font-weight: bold;
   color: white;
   background-color: #333333;
-  font-size: 10px;
+  font-size: 13px;
   width: 20%;
   font-weight: 400;
-  border-radius: 0px 12px 12px 0px;
-  font-weight: 700;
+  border-radius: 0px 5px 5px 0px;
   border: none;
   cursor: pointer;
+  font-family: inherit; /* 폰트 상속 */
+  opacity: ${(props) =>
+    props.disabled ? "0.7" : "1"}; // 비활성화 상태일 때 투명도 설정
+
+  &:active {
+    background-color: #5c5b5b;
+  }
+`;
+
+const Button3 = styled.button`
+  width: 100%;
+  height: auto; /* 높이값 초기화 */
+  line-height: normal; /* line-height 초기화 */
+  padding: 0.8em 0.5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */
+  font-family: inherit; /* 폰트 상속 */
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  background-color: #333333;
+  color: white;
+  opacity: ${(props) =>
+    props.disabled ? "0.7" : "1"}; // 비활성화 상태일 때 투명도 설정
 
   &:active {
     background-color: #5c5b5b;
@@ -207,18 +255,41 @@ const RadioContainer = styled.div`
   width: 100%; /* 원하는 너비 설정 */
   line-height: normal; /* line-height 초기화 */
   padding: 0.7em 0.5em; /* 원하는 여백 설정, 상하단 여백으로 높이를 조절 */
-  border-radius: 12px 0px 0px 12px;
-  background-color: white;
-  border-radius: 12px; /* iSO 둥근모서리 제거 */
+  border-radius: 5px; /* iSO 둥근모서리 제거 */
+  border: 1px solid rgb(153, 153, 153);
 `;
 
 const Radio = styled.div`
   display: flex;
   align-items: center;
+
+  .radio {
+    cursor: pointer;
+  }
+
+  input[type="radio"] {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #ccc; // 체크되지 않았을 때의 테두리 색상
+    border-radius: 50%;
+    outline: none; // focus 시에 나타나는 기본 스타일 제거
+    cursor: pointer;
+  }
+
+  // 체크될 시에, 변화되는 스타일 설정
+  input[type="radio"]:checked {
+    background-color: #f95001;
+    border: 3px solid white;
+    box-shadow: 0 0 0 1.6px #f95001;
+  }
 `;
 
 const Label = styled.label`
   margin-left: 5px;
+  cursor: pointer;
 `;
 
 const SignUp = () => {
@@ -235,6 +306,7 @@ const SignUp = () => {
   const [postNum, setPostNum] = useState("");
   const [post, setPost] = useState("");
   const [postDetail, setPostDetail] = useState("");
+  const [inputDate, setInputDate] = useState();
 
   // 오류 메시지
   const [idMessage, setIdMessage] = useState("");
@@ -259,6 +331,7 @@ const SignUp = () => {
 
   // 인증 후 활성화
   const [able, setAble] = useState(false);
+  const [btnAble, setBtnAble] = useState(true);
 
   //팝업 처리
   const [modalOpen, setModalOpen] = useState(false);
@@ -269,6 +342,13 @@ const SignUp = () => {
   const [ageCheck, setAgeCheck] = useState(false);
   const [useCheck, setUseCheck] = useState(false);
   const [marketingCheck, setMarketingCheck] = useState(false);
+
+  // 카카오 아이디, 비밀번호
+  const context = useContext(PayContext);
+  const { kakaoId, kakaoPw, setKakaoId, setKakaoPw } = context;
+
+  // 카카오 회원가입 시, 아이디, 비밀번호 input 비활성화
+  const [readOnly, setReadOnly] = useState(false);
 
   const closeModal = () => {
     setModalOpen(false);
@@ -309,17 +389,6 @@ const SignUp = () => {
     }
   };
 
-  const formatDate = (date) => {
-    // 년, 월, 일 구성 요소 추출
-    const year = date.getFullYear();
-    const month = (date.getMonth() + 1).toString().padStart(2, "0"); // getMonth()가 0부터 시작하므로 1을 더해줍니다.
-    const day = date.getDate().toString().padStart(2, "0");
-    setIsBirth(date !== "" && date !== undefined);
-
-    // "yyyy-mm-dd" 형식으로 조합
-    return `${year}-${month}-${day}`;
-  };
-
   const onChangePwConfirm = (e) => {
     const confirmPassword = e.target.value;
     setPwConfirm(confirmPassword);
@@ -340,45 +409,58 @@ const SignUp = () => {
   };
 
   const onChangeTel = (e) => {
-    const Tel = e.target.value;
-    const telWithoutHyphen = Tel.replace(/-/g, "");
+    const input = e.target.value;
+    const telWithoutHyphen = input.replace(/[^0-9]/g, ""); // 숫자만 남기고 나머지 문자 제거
     setInputTel(telWithoutHyphen);
     setIsTel(telWithoutHyphen !== "" && telWithoutHyphen !== undefined);
   };
 
-  const onChangeBirth = (e) => {
-    const Birth = e.target.value;
-    setInputBirth(Birth);
-    setIsBirth(Birth !== "" && Birth !== undefined);
-  };
-
   const SingupIdCheck = async (email) => {
-    try {
-      const resp = await AxiosApi.SingupIdCheck(email);
-      console.log("가입 가능 여부 확인 : ", resp.data);
-      if (resp.data === true) {
-        setModelText("사용 가능한 이메일 입니다. 이메일을 확인해주세요");
-        setModalOpen(true);
-        const response = await AxiosApi.EmailCert(email);
-        setSendEmail(response.data);
-        console.log(sendEmail);
-      } else {
-        setModelText("중복된 이메일 입니다.");
-        setModalOpen(true);
-      }
-    } catch (error) {
-      console.log(error);
-      setModelText("오류가 발생했습니다.");
-      console.log(email);
+    if (!isId) {
+      setModelText("입력된 이메일을 다시 확인해주세요.");
+      setModalOpen(true);
+      return;
+    }
+
+    const resp = await AxiosApi.SingupIdCheck(email);
+    console.log("가입 가능 여부 확인 : ", resp.data);
+
+    if (resp.data === true) {
+      setModelText("사용 가능한 이메일 입니다.");
+      setModalOpen(true);
+      setBtnAble(false);
+    } else {
+      setModelText("중복된 이메일 입니다.");
       setModalOpen(true);
     }
+  };
+
+  const SendEmail = async (email) => {
+    if (!isId) {
+      setModelText("입력한 이메일을 다시 확인해주세요.");
+      setModalOpen(true);
+      return;
+    }
+
+    const response = await AxiosApi.EmailCert(email);
+    if (response.status === 200) {
+      setModelText("인증번호가 발송되었습니다. 이메일을 확인해주세요");
+      setModalOpen(true);
+      setSendEmail(response.data);
+      setBtnAble(true);
+    } else {
+      setModelText("이메일 전송에 실패했습니다.");
+    }
+
+    setTimeout(() => {
+      setBtnAble(false);
+    }, 120);
   };
 
   const handleCertification = () => {
     if (inputCert === sendEmail && inputCert !== "") {
       // 인증번호가 일치할 때
       setModelText("인증이 완료되었습니다.");
-      setAble(false);
       setModalOpen(true);
     } else {
       // 인증번호가 일치하지 않을 때
@@ -402,16 +484,18 @@ const SignUp = () => {
       isTel &&
       isPost &&
       isPostNum &&
+      isBirth &&
       isGender
     ) {
       try {
+        const fullAddress = `${post} ${postDetail} ${postNum}`;
         const isLogin = await AxiosApi.Signup(
           inputId,
           inputPw,
           inputTel,
           inputName,
-          post + postDetail + postNum,
-          formatDate(inputBirth),
+          fullAddress,
+          inputBirth,
           inputGender
         );
         setModalOpen(true);
@@ -486,7 +570,50 @@ const SignUp = () => {
     } else {
       setAllCheck(false);
     }
+    if (kakaoId !== "" && kakaoPw !== "") {
+      setInputId(kakaoId);
+      setInputPw(kakaoPw);
+      setPwConfirm(kakaoPw);
+      setAble(true);
+      setBtnAble(true);
+      setReadOnly(true);
+      setIsId(true);
+      setIsPw(true);
+      setIsPwConfirm(true);
+    }
   }, [ageCheck, useCheck, marketingCheck]);
+
+  useEffect(() => {
+    return () => {
+      setKakaoId("");
+      setKakaoPw("");
+    };
+  }, []);
+
+  const formatDate = (date) => {
+    const year = date.getFullYear();
+    const month = (date.getMonth() + 1).toString().padStart(2, "0");
+    const day = date.getDate().toString().padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const onChangeBirth = (date) => {
+    if (date) {
+      const formattedDate = formatDate(date);
+      setInputDate(date);
+      setInputBirth(formattedDate);
+      setIsBirth(date !== "" && date !== undefined);
+    } else {
+      setInputBirth("");
+    }
+  };
+
+  const handleTextClick = (value) => {
+    // inputGender 상태 업데이트 또는 다른 필요한 로직 수행
+    setInputGender(value);
+  };
+
+  const maxSelectableDate = subDays(new Date(), 1);
 
   return (
     <CenteredContainer>
@@ -501,8 +628,11 @@ const SignUp = () => {
               placeholder="아이디(이메일)"
               value={inputId}
               onChange={onChangeId}
+              readOnly={readOnly}
             />
-            <Button2 onClick={() => SingupIdCheck(inputId)}>중복체크</Button2>
+            <Button2 onClick={() => SingupIdCheck(inputId)} disabled={able}>
+              중복체크
+            </Button2>
           </Items>
           <Hint>
             {inputId.length > 0 && (
@@ -511,23 +641,30 @@ const SignUp = () => {
               </span>
             )}
           </Hint>
-
+          <Items className="item2" style={{ display: "flex" }}>
+            <Button3 onClick={() => SendEmail(inputId)} disabled={btnAble}>
+              인증번호 발송
+            </Button3>
+          </Items>
           <Items className="item2" style={{ display: "flex" }}>
             <Input2
               placeholder="인증번호를 입력해주세요"
               value={inputCert}
               onChange={(e) => setInputCert(e.target.value)}
+              readOnly={readOnly}
             />
-            <Button2 onClick={handleCertification}>인증</Button2>
+            <Button2 onClick={handleCertification} disabled={able}>
+              인증
+            </Button2>
           </Items>
           <div style={{ height: "2%" }}></div>
           <Items className="item2">
             <Input
               type="password"
-              disabled={able}
               placeholder="패스워드"
               value={inputPw}
               onChange={onChangePw}
+              readOnly={readOnly}
             />
           </Items>
           <Hint>
@@ -540,10 +677,10 @@ const SignUp = () => {
           <Items className="item2">
             <Input
               type="password"
-              disabled={able}
               placeholder="패스워드 확인"
               value={pwConfirm}
               onChange={onChangePwConfirm}
+              readOnly={readOnly}
             />
           </Items>
           <Hint>
@@ -557,7 +694,6 @@ const SignUp = () => {
           <Items className="item2">
             <Input
               type="input"
-              disabled={able}
               placeholder="이름"
               value={inputName}
               onChange={onChangeName}
@@ -568,8 +704,7 @@ const SignUp = () => {
           <Items className="item2">
             <Input
               type="input"
-              disabled={able}
-              placeholder="전화번호 (하이픈(-)을 제외하고 입력해주세요)"
+              placeholder="전화번호 (하이픈(-) 제외, 숫자만 입력)"
               value={inputTel}
               onChange={onChangeTel}
             />
@@ -580,13 +715,14 @@ const SignUp = () => {
             <DatePicker
               placeholderText="생년월일"
               className="Calender"
+              selected={inputDate}
               locale={ko}
-              dateFormat="yyyy-MM-dd"
               shouldCloseOnSelect
-              selected={inputBirth}
-              onChange={(date) => setInputBirth(date)}
+              onChange={(date) => onChangeBirth(date)}
               showYearDropdown
               showMonthDropdown
+              dateFormat="yyyy년 MM월 dd일"
+              maxDate={maxSelectableDate}
             />
           </Items>
           <div style={{ height: "2%" }}></div>
@@ -596,13 +732,8 @@ const SignUp = () => {
             style={{ display: "flex", flexDirection: "column" }}
           >
             <div style={{ display: "flex", marginBottom: "8px" }}>
-              <Input2
-                type="input"
-                placeholder="주소"
-                disabled={able}
-                value={post}
-              />
-              <Button2 type="button" onClick={openPostCode} disabled={able}>
+              <Input2 type="input" placeholder="주소" value={post} />
+              <Button2 type="button" onClick={openPostCode}>
                 주소검색
               </Button2>
             </div>
@@ -618,16 +749,10 @@ const SignUp = () => {
               )}
             </div>
             <div style={{ display: "flex" }}>
-              <Input
-                type="input"
-                placeholder="우편번호"
-                disabled={able}
-                value={postNum}
-              />
+              <Input type="input" placeholder="우편번호" value={postNum} />
               <Input
                 type="input"
                 placeholder="상세주소 입력"
-                disabled={able}
                 value={postDetail}
                 onChange={(e) => setPostDetail(e.target.value)}
               />
@@ -646,10 +771,9 @@ const SignUp = () => {
                   value="남"
                   checked={inputGender === "남"}
                   onChange={handleGenderChange}
-                  disabled={able}
-                  style={{ cursor: "pointer" }}
+                  className="radio"
                 />
-                <Label>남자</Label>
+                <Label onClick={() => handleTextClick("남")}>남자</Label>
               </Radio>
               <Radio>
                 <input
@@ -658,18 +782,22 @@ const SignUp = () => {
                   value="여"
                   checked={inputGender === "여"}
                   onChange={handleGenderChange}
-                  disabled={able}
-                  style={{ cursor: "pointer" }}
+                  className="radio"
                 />
-                <Label>여자</Label>
+                <Label onClick={() => handleTextClick("여")}>여자</Label>
               </Radio>
             </RadioContainer>
           </Items>
           <div style={{ height: "2%" }}></div>
           <Items className="item2" style={{ display: "flex" }}>
-            <RadioContainer className="item2" style={{ marginBottom: "10px" }}>
+            <RadioContainer
+              className="item2"
+              style={{
+                marginBottom: "10px",
+              }}
+            >
               <Radio>
-                <form method="post" action="">
+                <form method="post">
                   <div>
                     <label>약관동의</label>
                     <div>

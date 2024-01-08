@@ -2,14 +2,12 @@ import moment from "moment";
 import axios from "axios";
 import "moment/locale/ko"; // 한글 로컬라이제이션
 moment.locale("ko"); // 한글 설정 적용
-
 const Common = {
   MUNG_HOST: "http://localhost:8111",
-
-
   timeFromNow: (timestamp) => {
     return moment(timestamp).fromNow();
   },
+  
   //시간 포맷팅 
   formatDate: (timestamp) => {
     const date = new Date(timestamp);
@@ -36,7 +34,7 @@ const Common = {
 
   // 401 에러 처리 함수 (토큰 리프래쉬토큰 재발급)
   handleUnauthorized: async () => {
-    console.log("에세스토큰 재발급");
+    // console.log("에세스토큰 재발급");
     const accessToken = Common.getAccessToken();
     const refreshToken = Common.getRefreshToken();
     const config = {
@@ -50,12 +48,12 @@ const Common = {
         refreshToken,
         config
       );
-      console.log(res.data);
-      console.log("토큰 재발급 완료!!")
+      // console.log(res.data);
+      // console.log("토큰 재발급 완료!!")
       Common.setAccessToken(res.data);
       return true;
     } catch (err) {
-      console.log(err);
+      // console.log(err);
       return false;
     }
   },

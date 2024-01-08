@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import AxiosApi from "../api/Axios";
-import { faL } from "@fortawesome/free-solid-svg-icons";
+import defaultDogImg from "../img/footer.png";
 
 const ModalStyle = styled.div`
-  button{
+  button {
     font-weight: bold;
-    background-color: #F95001;
-    &:hover{
-      color:#F95001;
+    background-color: #f95001;
+    &:hover {
+      color: #f95001;
     }
   }
   .modal {
@@ -53,8 +53,8 @@ const ModalStyle = styled.div`
 
   section > header button {
     position: absolute;
-    top: 15px;
-    right: 15px;
+    top: 10px;
+    right: 0;
     width: 30px;
     font-size: 21px;
     font-weight: 700;
@@ -77,8 +77,7 @@ const ModalStyle = styled.div`
     background-color: #333333;
     border-radius: 5px;
     font-size: 13px;
-    &:hover{
-      
+    &:hover {
     }
   }
   main {
@@ -89,7 +88,6 @@ const ModalStyle = styled.div`
       width: 150px;
       height: 150px;
       border-radius: 5px;
-      border: 1px solid #333333;
     }
   }
 
@@ -208,28 +206,40 @@ const DogCare = [
 ];
 
 const QuistModal = (props) => {
-  const { open, confirm, close, petGender, petSign, petAge, petName, petImg, id, quest,day} =props;
+  const {
+    open,
+    confirm,
+    close,
+    petGender,
+    petSign,
+    petAge,
+    petName,
+    petImg,
+    id,
+    quest,
+    day,
+  } = props;
   const [click1, setClick1] = useState(false);
   const [click2, setClick2] = useState(false);
   const [click3, setClick3] = useState(false);
   const [click4, setClick4] = useState(false);
   const [click5, setClick5] = useState(false);
 
-  useEffect(()=>{
+  useEffect(() => {
     setClick1(quest.quest1);
     setClick2(quest.quest2);
     setClick3(quest.quest3);
     setClick4(quest.quest4);
     setClick5(quest.quest5);
-  },[quest])
-  
-  useEffect(()=>{
-    setClick1(false)
-    setClick2(false)
-    setClick3(false)
-    setClick4(false)
-    setClick5(false)
-  },[day])
+  }, [quest]);
+
+  useEffect(() => {
+    setClick1(false);
+    setClick2(false);
+    setClick3(false);
+    setClick4(false);
+    setClick5(false);
+  }, [day]);
 
   const clickBtn = (index) => {
     if (index === 1) {
@@ -266,16 +276,32 @@ const QuistModal = (props) => {
     }
   };
 
-  const RegClick= async()=>{
-    console.log(id,click1,click2,click3,click4,click5,day);
-    const res = await AxiosApi.QuestReg(id,click1,click2,click3,click4,click5,day);
-    if( res.data === true){
+  const RegClick = async () => {
+    console.log(id, click1, click2, click3, click4, click5, day);
+    const res = await AxiosApi.QuestReg(
+      id,
+      click1,
+      click2,
+      click3,
+      click4,
+      click5,
+      day
+    );
+    if (res.data === true) {
       console.log(res.data);
       alert("저장완료!");
       close();
-    }else{alert("실패")}
+    } else {
+      alert("실패");
     }
+  };
+  const handleImageLoaded = () => {
+    console.log("이미지 로딩 성공!");
+  };
 
+  const handleImageError = (event) => {
+    event.target.src = defaultDogImg; // 이미지 로딩이 실패하면 기본 이미지로 대체
+  };
 
   return (
     <ModalStyle>
@@ -283,12 +309,17 @@ const QuistModal = (props) => {
         {open && (
           <section>
             <header>
-              {petName} 의 {day} 일정
+              {petName}의 {day} 일정
               <button onClick={close}>&times;</button>
             </header>
             <main>
               <div className="proBox">
-                <img src={petImg} className="dogFootImage" />
+                <img
+                  src={petImg}
+                  onLoad={handleImageLoaded}
+                  onError={handleImageError}
+                  className="dogFootImage"
+                />
                 <div>
                   <p>이름 : {petName}</p>
                   <p>나이 : {petAge}</p>
@@ -312,7 +343,7 @@ const QuistModal = (props) => {
               </div>
             </main>
             <footer>
-              <button onClick={()=>RegClick()}>수행완료!</button>
+              <button onClick={() => RegClick()}>수행완료</button>
               <button onClick={close}>취소하기</button>
             </footer>
           </section>
